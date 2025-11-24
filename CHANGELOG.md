@@ -5,10 +5,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
-## [1.6.6] - 2025-09-??
+## [1.6.6] - 2025-09-24
 
 ### Changed
-- updated PHlib to version 3.2.25263
+- updated PHlib to version 3.2.25324
 - improved process map handling
 
 ### Fixed

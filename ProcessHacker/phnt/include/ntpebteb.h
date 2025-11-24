@@ -7,41 +7,45 @@
 #ifndef _NTPEBTEB_H
 #define _NTPEBTEB_H
 
+#include <ntgdi.h>
 #include <ntsxs.h>
 
 typedef struct _RTL_USER_PROCESS_PARAMETERS *PRTL_USER_PROCESS_PARAMETERS;
 typedef struct _RTL_CRITICAL_SECTION *PRTL_CRITICAL_SECTION;
 typedef struct _SILO_USER_SHARED_DATA *PSILO_USER_SHARED_DATA;
+typedef struct _LDR_RESLOADER_RET LDR_RESLOADER_RET, *PLDR_RESLOADER_RET;
 typedef struct _LEAP_SECOND_DATA *PLEAP_SECOND_DATA;
 typedef struct _PEB_LDR_DATA PEB_LDR_DATA, *PPEB_LDR_DATA;
 typedef struct tagSOleTlsData SOleTlsData, *PSOleTlsData;
 typedef struct _APPCOMPAT_EXE_DATA APPCOMPAT_EXE_DATA, *PAPPCOMPAT_EXE_DATA;
+typedef struct _KERNEL_CALLBACK_TABLE KERNEL_CALLBACK_TABLE, *PKERNEL_CALLBACK_TABLE;
 
 // PEB->AppCompatFlags
-#define KACF_OLDGETSHORTPATHNAME 0x00000001
-#define KACF_VERSIONLIE_NOT_USED 0x00000002
-#define KACF_GETTEMPPATH_NOT_USED 0x00000004
-#define KACF_GETDISKFREESPACE 0x00000008
-#define KACF_FTMFROMCURRENTAPT 0x00000020
-#define KACF_DISALLOWORBINDINGCHANGES 0x00000040
-#define KACF_OLE32VALIDATEPTRS 0x00000080
-#define KACF_DISABLECICERO 0x00000100
-#define KACF_OLE32ENABLEASYNCDOCFILE 0x00000200
-#define KACF_OLE32ENABLELEGACYEXCEPTIONHANDLING 0x00000400
-#define KACF_RPCDISABLENDRCLIENTHARDENING 0x00000800
-#define KACF_RPCDISABLENDRMAYBENULL_SIZEIS 0x00001000
-#define KACF_DISABLEALLDDEHACK_NOT_USED 0x00002000
-#define KACF_RPCDISABLENDR61_RANGE 0x00004000
-#define KACF_RPC32ENABLELEGACYEXCEPTIONHANDLING 0x00008000
-#define KACF_OLE32DOCFILEUSELEGACYNTFSFLAGS 0x00010000
-#define KACF_RPCDISABLENDRCONSTIIDCHECK 0x00020000
-#define KACF_USERDISABLEFORWARDERPATCH 0x00040000
-#define KACF_OLE32DISABLENEW_WMPAINT_DISPATCH 0x00100000
-#define KACF_ADDRESTRICTEDSIDINCOINITIALIZESECURITY 0x00200000
-#define KACF_ALLOCDEBUGINFOFORCRITSECTIONS 0x00400000
-#define KACF_OLEAUT32ENABLEUNSAFELOADTYPELIBRELATIVE 0x00800000
-#define KACF_ALLOWMAXIMIZEDWINDOWGAMMA 0x01000000
-#define KACF_DONOTADDTOCACHE 0x80000000
+#define KACF_OLDGETSHORTPATHNAME                      0x00000001
+#define KACF_VERSIONLIE_NOT_USED                      0x00000002
+#define KACF_GETTEMPPATH_NOT_USED                     0x00000004
+#define KACF_GETDISKFREESPACE                         0x00000008
+#define KACF_FTMFROMCURRENTAPT                        0x00000020
+#define KACF_DISALLOWORBINDINGCHANGES                 0x00000040
+#define KACF_OLE32VALIDATEPTRS                        0x00000080
+#define KACF_DISABLECICERO                            0x00000100
+#define KACF_OLE32ENABLEASYNCDOCFILE                  0x00000200
+#define KACF_OLE32ENABLELEGACYEXCEPTIONHANDLING       0x00000400
+#define KACF_RPCDISABLENDRCLIENTHARDENING             0x00000800
+#define KACF_RPCDISABLENDRMAYBENULL_SIZEIS            0x00001000
+#define KACF_DISABLEALLDDEHACK_NOT_USED               0x00002000
+#define KACF_RPCDISABLENDR61_RANGE                    0x00004000
+#define KACF_RPC32ENABLELEGACYEXCEPTIONHANDLING       0x00008000
+#define KACF_OLE32DOCFILEUSELEGACYNTFSFLAGS           0x00010000
+#define KACF_RPCDISABLENDRCONSTIIDCHECK               0x00020000
+#define KACF_USERDISABLEFORWARDERPATCH                0x00040000
+#define KACF_OLE32DISABLENEW_WMPAINT_DISPATCH         0x00100000
+#define KACF_ADDRESTRICTEDSIDINCOINITIALIZESECURITY   0x00200000
+#define KACF_ALLOCDEBUGINFOFORCRITSECTIONS            0x00400000
+#define KACF_OLEAUT32ENABLEUNSAFELOADTYPELIBRELATIVE  0x00800000
+#define KACF_ALLOWMAXIMIZEDWINDOWGAMMA                0x01000000
+#define KACF_DONOTADDTOCACHE                          0x80000000
+#define KACF_DISABLEPOSIXDELETEFILE                  0x100000000 // rev KernelBase!InternalDeleteFileW
 
 // private
 #define API_SET_SECTION_NAME ".apiset"
@@ -349,7 +353,7 @@ typedef struct _PEB
             BOOLEAN IsImageDynamicallyRelocated : 1;    // The process image base address was relocated.
             BOOLEAN SkipPatchingUser32Forwarders : 1;   // The process skipped forwarders for User32.dll functions. 1 for 64-bit, 0 for 32-bit.
             BOOLEAN IsPackagedProcess : 1;              // The process is a packaged store process (APPX/MSIX).
-            BOOLEAN IsAppContainer : 1;                 // The process has an AppContainer token.
+            BOOLEAN IsAppContainerProcess : 1;          // The process has an AppContainer token.
             BOOLEAN IsProtectedProcessLight : 1;        // The process is a protected process (light).
             BOOLEAN IsLongPathAwareProcess : 1;         // The process is long path aware.
         };
@@ -396,9 +400,9 @@ typedef struct _PEB
     PSLIST_HEADER AtlThunkSListPtr;
 
     //
-    // Pointer to the Image File Execution Options key.
+    // Handle to the Image File Execution Options key.
     //
-    PVOID IFEOKey;
+    HANDLE IFEOKey;
 
     //
     // Cross process flags.
@@ -425,7 +429,7 @@ typedef struct _PEB
     //
     union
     {
-        PVOID KernelCallbackTable;
+        PKERNEL_CALLBACK_TABLE KernelCallbackTable;
         PVOID UserSharedInfoPtr;
     };
 
@@ -475,19 +479,19 @@ typedef struct _PEB
     PVOID* ReadOnlyStaticServerData;
 
     //
-    // Pointer to the ANSI code page data. (PCPTABLEINFO)
+    // Pointer to the ANSI code page data.
     //
-    PVOID AnsiCodePageData;
+    PCPTABLEINFO AnsiCodePageData;
 
     //
-    // Pointer to the OEM code page data. (PCPTABLEINFO)
+    // Pointer to the OEM code page data.
     //
-    PVOID OemCodePageData;
+    PCPTABLEINFO OemCodePageData;
 
     //
-    // Pointer to the Unicode case table data. (PNLSTABLEINFO)
+    // Pointer to the Unicode case table data.
     //
-    PVOID UnicodeCaseTableData;
+    PNLSTABLEINFO UnicodeCaseTableData;
 
     //
     // The total number of system processors.
@@ -583,7 +587,7 @@ typedef struct _PEB
     //
     // Pointer to the system GDI shared handle table.
     //
-    PVOID GdiSharedHandleTable;
+    PGDI_HANDLE_ENTRY GdiSharedHandleTable;
 
     //
     // Pointer to the process starter helper.
@@ -787,7 +791,7 @@ typedef struct _PEB
     //
     // Reserved.
     //
-    PVOID pImageHeaderHash;
+    PVOID ImageHeaderHash;
 
     //
     // ETW tracing flags.
@@ -1002,10 +1006,18 @@ typedef struct _TEB
     PVOID CsrClientThread;
 
     //
-    // Reserved for GDI/USER (Win32k).
+    // Reserved for win32k.sys
     //
     PVOID Win32ThreadInfo;
+ 
+    //
+    // Reserved for user32.dll
+    //
     ULONG User32Reserved[26];
+
+    //
+    // Reserved for winsrv.dll
+    //
     ULONG UserReserved[5];
 
     //
@@ -1030,7 +1042,7 @@ typedef struct _TEB
 
 #ifdef _WIN64
     //
-    // Reserved.
+    // Reserved for floating-point emulation.
     //
     PVOID SystemReserved1[25];
 
@@ -1353,14 +1365,14 @@ typedef struct _TEB
     //
     PVOID FlsData;
 
-    // 
+    //
     // Pointer to the preferred languages for the current thread. (GetThreadPreferredUILanguages)
-    // 
+    //
     PVOID PreferredLanguages;
 
-    // 
+    //
     // Pointer to the user-preferred languages for the current thread. (GetUserPreferredUILanguages)
-    // 
+    //
     PVOID UserPrefLanguages;
 
     //
@@ -1435,9 +1447,9 @@ typedef struct _TEB
     LONG WowTebOffset;
 
     //
-    // Reserved.
+    // Pointer to the DLL containing the resource (valid after LdrFindResource_U/LdrResFindResource/etc... returns).
     //
-    PVOID ResourceRetValue;
+    PLDR_RESLOADER_RET ResourceRetValue;
 
     //
     // Reserved for Windows Driver Framework (WDF).

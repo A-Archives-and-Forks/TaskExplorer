@@ -3,7 +3,7 @@ REM @ECHO OFF
 echo %*
 IF "%~4" == "" ( set "openssl_version=3.4.0" ) ELSE ( set "openssl_version=%~4" )
 IF "%~3" == "" ( set "qt6_version=6.8.1" ) ELSE ( set "qt6_version=%~3" )
-IF "%~2" == "" ( set "qt_version=5.15.2" ) ELSE ( set "qt_version=%~2" )
+IF "%~2" == "" ( set "qt_version=5.15.16" ) ELSE ( set "qt_version=%~2" )
 
 REM IF "%openssl_version:~0,3%" == "1.1" ( set "sslMajorVersion=1_1" ) ELSE ( set "sslMajorVersion=3" )
 
@@ -12,9 +12,9 @@ IF %1 == x86 (
   set phPath=%~dp0..\ProcessHacker\bin\Release32
 REM  set siPath=%~dp0..\ProcessHacker\KSystemInformer\bin\Release32
   set siPath=%~dp0..\ProcessHacker\KSystemInformer\bin-signed\i386
-REM call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
+REM call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
   call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
-  set qtPath=%~dp0..\..\Qt\%qt_version%\msvc2019
+  set qtPath=C:\Qt\Qt%qt_version%\%qt_version%\msvc2022
   set instPath=%~dp0\Build\x86
 )
 IF %1 == x64 (
@@ -22,9 +22,9 @@ IF %1 == x64 (
   set phPath=%~dp0..\ProcessHacker\bin\Release64
 REM  set siPath=%~dp0..\ProcessHacker\KSystemInformer\bin\Release64
   set siPath=%~dp0..\ProcessHacker\KSystemInformer\bin-signed\x64
-REM  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+REM  call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
   call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-  set qtPath=%~dp0..\..\Qt\%qt_version%\msvc2019_64
+  set qtPath=C:\Qt\Qt%qt_version%\%qt_version%\msvc2022_64
   set instPath=%~dp0\Build\x64
 )
 IF %1 == ARM64 (
@@ -32,9 +32,9 @@ IF %1 == ARM64 (
   set phPath=%~dp0..\ProcessHacker\bin\ReleaseARM64
 REM  set siPath=%~dp0..\ProcessHacker\KSystemInformer\bin\ReleaseARM64
   set siPath=%~dp0..\ProcessHacker\KSystemInformer\bin-signed\AMD64
-REM  call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsamd64_arm64.bat"
+REM  call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsamd64_arm64.bat"
   call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsamd64_arm64.bat"
-  set qtPath=%~dp0..\..\Qt\%qt6_version%\msvc2022_arm64
+  set qtPath=C:\Qt\%qt6_version%\msvc2022_arm64
   set instPath=%~dp0\Build\a64
   set "sslMajorVersion=1_1"
 )
@@ -43,7 +43,7 @@ set srcPath=%~dp0..\%archPath%\Release
 set VCToolsVersion=14.29.30133
 
 REM set redistPath=%VCToolsRedistDir%\%1\Microsoft.VC142.CRT
-REM set redistPath=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Redist\MSVC\%VCToolsVersion%\%1\Microsoft.VC142.CRT
+REM set redistPath=C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Redist\MSVC\%VCToolsVersion%\%1\Microsoft.VC142.CRT
 set redistPath=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Redist\MSVC\%VCToolsVersion%\%1\Microsoft.VC142.CRT
 
 @echo on

@@ -59,7 +59,7 @@ PSID PhSeInternetExplorerSid(
     VOID
     );
 
-PSID PhSeCloudActiveDirectorySid(
+PSID NTAPI PhSeCloudActiveDirectorySid(
     VOID
     );
 
@@ -75,6 +75,13 @@ extern CONST ULONG PhCharToInteger[256];
 extern CONST CHAR PhIntegerToChar[69];
 extern CONST CHAR PhIntegerToCharUpper[69];
 
+// UTF-16
+
+extern CONST BOOLEAN PhIsUTF16HighSurrogateHighByte[256];
+extern CONST BOOLEAN PhIsUTF16LowSurrogateHighByte[256];
+extern CONST BOOLEAN PhIsUTF16StandaloneHighByte[256];
+extern CONST BOOLEAN PhIsUTF16PrintableHighByte[256];
+
 // CRC32
 
 extern CONST ULONG PhCrc32Table[256];
@@ -85,6 +92,15 @@ extern CONST PH_STRINGREF PhIoPriorityHintNames[];
 extern CONST PH_STRINGREF PhPagePriorityNames[];
 extern CONST PH_STRINGREF PhKThreadStateNames[];
 extern CONST PH_STRINGREF PhKWaitReasonNames[];
+
+// Aliases
+
+extern CONST PH_STRINGREF PhHalFileAliasList[];
+extern CONST PH_STRINGREF PhKernelFileAliasList[];
+extern CONST PH_STRINGREF PhSecureKernelFileAliasList[];
+extern CONST PH_STRINGREF PhHypervisorFileAliasList[];
+extern CONST PH_STRINGREF PhOsLoaderFileAliasList[];
+extern CONST PH_STRINGREF PhOsBootFileAliasList[];
 
 #ifdef __cplusplus
 }

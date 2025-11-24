@@ -49,7 +49,7 @@ CWinModule::~CWinModule()
 {
 }
 
-extern "C" NTSTATUS PhModuleItemReadVirtualMemoryCallback(
+extern "C" NTSTATUS NTAPI PhModuleItemReadVirtualMemoryCallback(
 	_In_ HANDLE ProcessHandle,
 	_In_ PVOID BaseAddress,
 	_Out_writes_bytes_(BufferSize) PVOID Buffer,

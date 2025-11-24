@@ -13,7 +13,7 @@
 #define IMAGE_FILE_MACHINE_CHPE_X86          0x3A64
 #define IMAGE_FILE_MACHINE_ARM64EC           0xA641
 #define IMAGE_FILE_MACHINE_ARM64X            0xA64E
-#endif
+#endif // (PHNT_MODE != PHNT_MODE_KERNEL)
 
 typedef struct _IMAGE_DEBUG_POGO_ENTRY
 {
@@ -28,7 +28,10 @@ typedef struct _IMAGE_DEBUG_POGO_SIGNATURE
 } IMAGE_DEBUG_POGO_SIGNATURE, *PIMAGE_DEBUG_POGO_SIGNATURE;
 
 #define IMAGE_DEBUG_POGO_SIGNATURE_LTCG 'LTCG' // coffgrp LTCG (0x4C544347)
+#define IMAGE_DEBUG_POGO_SIGNATURE_PGI 'PGI\0' // coffgrp PGI (0x50474900)
+#define IMAGE_DEBUG_POGO_SIGNATURE_PGO 'PGO\0' // coffgrp PGO (0x50474F00)
 #define IMAGE_DEBUG_POGO_SIGNATURE_PGU 'PGU\0' // coffgrp PGU (0x50475500)
+#define IMAGE_DEBUG_POGO_SIGNATURE_SPGO 'SPGO' // coffgrp SPGO (0x5350474F)
 
 typedef struct _IMAGE_RELOCATION_RECORD
 {
@@ -188,9 +191,9 @@ typedef struct _IMAGE_BDD_INFO {
 typedef struct _IMAGE_FUNCTION_OVERRIDE_DYNAMIC_RELOCATION {
     ULONG OriginalRva;          // RVA of original function
     ULONG BDDOffset;            // Offset into the BDD region
-    ULONG RvaSize;              // Size in bytes taken by RVAs. Must be multiple of sizeof(DWORD).
+    ULONG RvaSize;              // Size in bytes taken by RVAs. Must be multiple of sizeof(ULONG).
     ULONG BaseRelocSize;        // Size in bytes taken by BaseRelocs
-    // DWORD RVAs[RvaSize / sizeof(DWORD)];     // Array containing overriding func RVAs.
+    // ULONG RVAs[RvaSize / sizeof(ULONG)];     // Array containing overriding func RVAs.
     // IMAGE_BASE_RELOCATION  BaseRelocs[ANYSIZE_ARRAY];
     // ^Base relocations (RVA + Size + TO)
     // ^Padded with extra TOs for 4B alignment
@@ -208,11 +211,11 @@ typedef struct _IMAGE_BDD_DYNAMIC_RELOCATION {
 #define IMAGE_FUNCTION_OVERRIDE_X64_REL32       1  // 32-bit relative address from byte following reloc
 #define IMAGE_FUNCTION_OVERRIDE_ARM64_BRANCH26  2  // 26 bit offset << 2 & sign ext. for B & BL
 #define IMAGE_FUNCTION_OVERRIDE_ARM64_THUNK     3
-#endif
+#endif // !defined(NTDDI_WIN10_NI) || (NTDDI_VERSION < NTDDI_WIN10_NI)
 
 #if !defined(NTDDI_WIN11_GE) || (NTDDI_VERSION < NTDDI_WIN11_GE)
 #define IMAGE_DLLCHARACTERISTICS_EX_FORWARD_CFI_COMPAT                          0x40
 #define IMAGE_DLLCHARACTERISTICS_EX_HOTPATCH_COMPATIBLE                         0x80
-#endif
+#endif // !defined(NTDDI_WIN11_GE) || (NTDDI_VERSION < NTDDI_WIN11_GE)
 
-#endif
+#endif // _NTIMAGE_H

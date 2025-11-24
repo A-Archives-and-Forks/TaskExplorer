@@ -71,6 +71,18 @@ typedef NTSTATUS (NTAPI* _LdrControlFlowGuardEnforcedWithExportSuppression)(
 
 typedef PS_SYSTEM_DLL_INIT_BLOCK* _LdrSystemDllInitBlock;
 
+typedef NTSTATUS (NTAPI* _LdrResFindResource)(
+    _In_ PVOID DllHandle,
+    _In_ PCWSTR Type,
+    _In_ PCWSTR Name,
+    _In_ PCWSTR Language,
+    _Out_opt_ PVOID* ResourceBuffer,
+    _Out_opt_ PSIZE_T ResourceLength,
+    _Out_writes_bytes_opt_(CultureNameLength) PVOID CultureName, // WCHAR buffer[6]
+    _Out_opt_ PULONG CultureNameLength,
+    _In_opt_ ULONG Flags
+    );
+
 typedef NTSTATUS (NTAPI* _NtCreateProcessStateChange)(
     _Out_ PHANDLE ProcessStateChangeHandle,
     _In_ ACCESS_MASK DesiredAccess,
@@ -452,6 +464,7 @@ PH_DECLARE_IMPORT(NtCompareObjects);
 
 PH_DECLARE_IMPORT(NtSetInformationVirtualMemory);
 PH_DECLARE_IMPORT(LdrSystemDllInitBlock);
+PH_DECLARE_IMPORT(LdrResFindResource);
 
 PH_DECLARE_IMPORT(RtlDefaultNpAcl);
 PH_DECLARE_IMPORT(RtlDelayExecution);
