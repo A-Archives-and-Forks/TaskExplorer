@@ -102,6 +102,12 @@
     <Filter Include="API\Windows\SystemHacker">
       <UniqueIdentifier>{128cb3e9-a9b4-40b1-92cd-9fa7f9eb29bd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="API\Windows\WinHelpers\FuncHook">
+      <UniqueIdentifier>{15e10620-4193-427e-ae2f-15b892dad844}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="API\Windows\WinHelpers\FuncHook\Detours">
+      <UniqueIdentifier>{2a689bdf-52b9-4bd1-a07f-60ea8699e800}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -614,6 +620,42 @@
     <ClCompile Include="Common\Strings.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\HookUtils.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\creatwth.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\detours.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\disasm.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\disolarm.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\disolarm64.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\disolia64.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\disolx64.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\disolx86.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\image.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\modules.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
+    <ClCompile Include="API\Windows\WinHelpers\FuncHook\Detours\uimports.cpp">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -816,6 +858,15 @@
     </ClInclude>
     <ClInclude Include="version.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="API\Windows\WinHelpers\FuncHook\HookUtils.h">
+      <Filter>API\Windows\WinHelpers\FuncHook</Filter>
+    </ClInclude>
+    <ClInclude Include="API\Windows\WinHelpers\FuncHook\Detours\detours.h">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </ClInclude>
+    <ClInclude Include="API\Windows\WinHelpers\FuncHook\Detours\detver.h">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1251,6 +1302,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\CHANGELOG.md" />
+    <None Include="API\Windows\WinHelpers\FuncHook\Detours\Makefile">
+      <Filter>API\Windows\WinHelpers\FuncHook\Detours</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="Forms\NewService.ui">

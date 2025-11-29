@@ -5344,62 +5344,62 @@ PartiallyChecked state means apply only to thread std::list.</source>
 <context>
     <name>CTaskExplorer</name>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="874"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="929"/>
         <source>Updating DynData</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="891"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="946"/>
         <source>Failed to open archive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="903"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="958"/>
         <source>DynData not found in archive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="926"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="981"/>
         <source>Failed to extreact files.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="936"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="991"/>
         <source>Updated DynData successfully</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="949"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="1004"/>
         <source>Latest SI build already downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="964"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="1019"/>
         <source>Downloading latest SI build</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="971"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="1026"/>
         <source>Download Failed, Error: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="977"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="1032"/>
         <source>Failed to open file for writing.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="983"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="1038"/>
         <source>Successfully Downloaded latest SI build</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="1004"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="1059"/>
         <source>Update Check Failed, Error: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="1013"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="1068"/>
         <source>Update Check Failed, Error: Unrecognized Reply</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6231,44 +6231,44 @@ Swap: %1%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="180"/>
+        <location filename="main.cpp" line="211"/>
         <source>Failed to update DynData, %1, Error: 0x%2 (%3).
 Do you want to continue anyways (Ok), or terminate (Cancel)?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="188"/>
+        <location filename="main.cpp" line="219"/>
         <source>The current DynData for the KTaskExplorer driver does not yet supported on your windows kernel version.&lt;br /&gt;You can check for &lt;a href=&quot;https://github.com/DavidXanatos/TaskExplorer/releases&quot;&gt;TaskExplorer updates on github&lt;/a&gt;, or grab the latest ksidyn.bin and ksidyn.sig from &lt;a href=&quot;https://systeminformer.sourceforge.io/downloads&quot;&gt;the latest SystemInformer&lt;/a&gt; and put them in the instalaltion directors next to KSystemInformer.sys.&lt;br /&gt;Instalation Directory: %4&lt;br /&gt;&lt;br /&gt;Operating System Details:&lt;br /&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Windows %1&lt;br /&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Windows Kernel %2&lt;br /&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;TaskExplorer %3&lt;br /&gt;&lt;br /&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="201"/>
+        <location filename="main.cpp" line="232"/>
         <source>Update did not help, do you want to continue anyways (Ok), or terminate (Cancel)?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="203"/>
+        <location filename="main.cpp" line="234"/>
         <source>Do you want to try to download updated DynData (Yes), start without the driver (No), or terminate (Cancel)?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="208"/>
+        <location filename="main.cpp" line="239"/>
         <source>Failed to load KTaskExplorer driver, %1, Error: 0x%2 (%3).
 Do you want to continue anyways (Ok), or terminate (Cancel)?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="214"/>
+        <location filename="main.cpp" line="245"/>
         <source>Disable KTaskExplorer driver. Note: this will limit the aplications functionality!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="221"/>
+        <location filename="main.cpp" line="252"/>
         <source>Failed to update DynData, %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="300"/>
+        <location filename="main.cpp" line="331"/>
         <source>You are attempting to run the 32-bit version of Task Explorer on 64-bit Windows. Most features will not work correctly.
 
 Please run the 64-bit version of Task Explorer instead.</source>
@@ -10759,7 +10759,7 @@ If you save the recovery information using this program, the additional failure 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="API/Windows/ProcessHacker.cpp" line="634"/>
+        <location filename="API/Windows/ProcessHacker.cpp" line="694"/>
         <source>The kernel driver file &apos;%1&apos; was not found.</source>
         <translation type="unfinished"></translation>
     </message>

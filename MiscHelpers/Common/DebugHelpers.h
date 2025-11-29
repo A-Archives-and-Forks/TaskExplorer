@@ -170,4 +170,5 @@ private:
 #endif
 
 MISCHELPERS_EXPORT void InitMiniDumpWriter(const wchar_t* Name, const wchar_t* Path);
+MISCHELPERS_EXPORT extern bool g_MyCrashHandlerExceptionFilter_Engaged;
 MISCHELPERS_EXPORT quint64 GetCurCycle();

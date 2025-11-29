@@ -150,13 +150,73 @@ HMODULE GetThisModuleHandle()
     return hModule;
 }
 
+// Hook: NtMapViewOfSection
+
+#include "WinHelpers/FuncHook/HookUtils.h"
+
+typedef NTSTATUS (*P_NtMapViewOfSection)(
+	IN  HANDLE SectionHandle,
+	IN  HANDLE ProcessHandle,
+	IN  OUT PVOID *BaseAddress,
+	IN  ULONG_PTR ZeroBits,
+	IN  SIZE_T CommitSize,
+	IN  OUT PLARGE_INTEGER SectionOffset OPTIONAL,
+	IN  OUT PSIZE_T ViewSize,
+	IN  ULONG InheritDisposition,
+	IN  ULONG AllocationType,
+	IN  ULONG Protect);
+
+P_NtMapViewOfSection NtMapViewOfSectionTramp = NULL;
+
+bool IsMemoryReadable(PVOID Address)
+{
+	MEMORY_BASIC_INFORMATION mbi;
+	if (VirtualQuery(Address, &mbi, sizeof(mbi)) == 0)
+		return false;
+
+	if (mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))
+		return true;
+
+	return false;
+}
+
+NTSTATUS NTAPI MyMapViewOfSection(
+	IN  HANDLE SectionHandle,
+	IN  HANDLE ProcessHandle,
+	IN  OUT PVOID* BaseAddress,
+	IN  ULONG_PTR ZeroBits,
+	IN  SIZE_T CommitSize,
+	IN  OUT PLARGE_INTEGER SectionOffset OPTIONAL,
+	IN  OUT PSIZE_T ViewSize,
+	IN  ULONG InheritDisposition,
+	IN  ULONG AllocationType,
+	IN  ULONG Protect)
+{
+	NTSTATUS status = NtMapViewOfSectionTramp(SectionHandle, ProcessHandle, BaseAddress, ZeroBits, CommitSize, SectionOffset, ViewSize, InheritDisposition, AllocationType, Protect);
+	if (NT_SUCCESS(status) && !g_MyCrashHandlerExceptionFilter_Engaged)
+	{
+		if (BaseAddress && *BaseAddress && !IsMemoryReadable(*BaseAddress))
+		{
+			DbgPrint("MyMapViewOfSection: Invalid BaseAddress: %p", *BaseAddress);
+			status = STATUS_ACCESS_DENIED;
+		}
+	}
+	return status;
+}
+
 int InitPH(bool bSvc)
 {
 	HINSTANCE Instance = GetThisModuleHandle(); // (HINSTANCE)::GetModuleHandle(NULL);
 	LONG result;
-#ifdef DEBUG
-	PHP_BASE_THREAD_DBG dbg;
-#endif
+
+	//
+	// If a dll is not signed like a shell extension for the default windows file open dialog,
+	// or alike, we have a problem as our driver when ImageLoadProtection == TRUE will block the loading of the dll
+	// and unmap the just loaded section from the driver, so we add a sanity check for NtMapViewOfSection
+	// if it returns no error but the memory is not readable return STATUS_ACCESS_DENIED instead.
+	//
+
+	HookFunction(GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtMapViewOfSection"), MyMapViewOfSection, (VOID**)&NtMapViewOfSectionTramp);
 
 	CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
@@ -479,10 +539,10 @@ NTSTATUS PhRestartSelf(
 		PROCESS_CREATION_MITIGATION_POLICY_BOTTOM_UP_ASLR_ALWAYS_ON |
 		PROCESS_CREATION_MITIGATION_POLICY_HIGH_ENTROPY_ASLR_ALWAYS_ON |
 		PROCESS_CREATION_MITIGATION_POLICY_EXTENSION_POINT_DISABLE_ALWAYS_ON |
-		PROCESS_CREATION_MITIGATION_POLICY_CONTROL_FLOW_GUARD_ALWAYS_ON |
-		PROCESS_CREATION_MITIGATION_POLICY_IMAGE_LOAD_PREFER_SYSTEM32_ALWAYS_ON),
+		// PROCESS_CREATION_MITIGATION_POLICY_IMAGE_LOAD_PREFER_SYSTEM32_ALWAYS_ON |
+		PROCESS_CREATION_MITIGATION_POLICY_CONTROL_FLOW_GUARD_ALWAYS_ON ),
 		(PROCESS_CREATION_MITIGATION_POLICY2_LOADER_INTEGRITY_CONTINUITY_ALWAYS_ON |
-		//PROCESS_CREATION_MITIGATION_POLICY2_STRICT_CONTROL_FLOW_GUARD_ALWAYS_ON |
+		// PROCESS_CREATION_MITIGATION_POLICY2_STRICT_CONTROL_FLOW_GUARD_ALWAYS_ON |
 		// PROCESS_CREATION_MITIGATION_POLICY2_BLOCK_NON_CET_BINARIES_ALWAYS_ON |
 		// PROCESS_CREATION_MITIGATION_POLICY2_XTENDED_CONTROL_FLOW_GUARD_ALWAYS_ON |
 		PROCESS_CREATION_MITIGATION_POLICY2_MODULE_TAMPERING_PROTECTION_ALWAYS_ON)
@@ -689,7 +749,7 @@ STATUS InitKSI(const QString& AppDir)
 
 	config.Flags.Flags = 0;
 #ifdef _DEBUG 
-	config.Flags.DisableImageLoadProtection = theConf->GetBool("OptionsKSI/DisableImageLoadProtection", true);
+	config.Flags.DisableImageLoadProtection = theConf->GetBool("OptionsKSI/DisableImageLoadProtection", false);
 	config.Flags.AllowDebugging = theConf->GetBool("OptionsKSI/AllowDebugging", true);
 #else
 	config.Flags.DisableImageLoadProtection = theConf->GetBool("OptionsKSI/DisableImageLoadProtection", false);
@@ -715,21 +775,39 @@ STATUS InitKSI(const QString& AppDir)
 		{
 			KPH_LEVEL level = KphLevelEx(FALSE);
 
+			QStringList Info;
+
+			KPH_PROCESS_STATE processState = KphGetCurrentProcessState();
+			if ((processState != 0) && (processState & KPH_PROCESS_STATE_MAXIMUM) != KPH_PROCESS_STATE_MAXIMUM)
+			{
+				if (!BooleanFlagOn(processState, KPH_PROCESS_SECURELY_CREATED))
+					Info.append("not securely created");
+				if (!BooleanFlagOn(processState, KPH_PROCESS_VERIFIED_PROCESS))
+					Info.append("unverified primary image");
+				if (!BooleanFlagOn(processState, KPH_PROCESS_PROTECTED_PROCESS))
+					Info.append("inactive protections");
+				if (!BooleanFlagOn(processState, KPH_PROCESS_NO_UNTRUSTED_IMAGES))
+					Info.append("unsigned images (likely an unsigned plugin)");
+				if (!BooleanFlagOn(processState, KPH_PROCESS_NOT_BEING_DEBUGGED))
+					Info.append("process is being debugged");
+				if ((processState & KPH_PROCESS_STATE_MINIMUM) != KPH_PROCESS_STATE_MINIMUM)
+					Info.append("tampered primary image");
+			}
+
 			if ((level != KphLevelMax))
 			{
+				Status = ERR(QString("Unable to access the kernel driver: %1.").arg(Info.join(", ")), STATUS_ACCESS_DENIED);
+
 #ifndef _DEBUG
 				if (!NtCurrentPeb()->BeingDebugged)
 				{
-					if ((level == KphLevelHigh) &&
-						!g_KphStartupMax)
+					if ((level == KphLevelHigh) && !g_KphStartupMax)
 					{
 						PH_STRINGREF commandline = PH_STRINGREF_INIT(L" -kx");
 						status = PhRestartSelf(&commandline);
 					}
 
-					if ((level < KphLevelHigh) &&
-						!g_KphStartupMax &&
-						!g_KphStartupHigh)
+					if ((level < KphLevelHigh) && !g_KphStartupMax && !g_KphStartupHigh)
 					{
 						PH_STRINGREF commandline = PH_STRINGREF_INIT(L" -kh");
 						status = PhRestartSelf(&commandline);
@@ -738,30 +816,7 @@ STATUS InitKSI(const QString& AppDir)
 					if (!NT_SUCCESS(status))
 						Status = ERR("PhRestartSelf failed.", STATUS_ACCESS_DENIED);
 				}
-				else
 #endif
-				{
-					QStringList Info;
-
-					KPH_PROCESS_STATE processState = KphGetCurrentProcessState();
-					if ((processState != 0) && (processState & KPH_PROCESS_STATE_MAXIMUM) != KPH_PROCESS_STATE_MAXIMUM)
-					{
-						if (!BooleanFlagOn(processState, KPH_PROCESS_SECURELY_CREATED))
-							Info.append("not securely created");
-						if (!BooleanFlagOn(processState, KPH_PROCESS_VERIFIED_PROCESS))
-							Info.append("unverified primary image");
-						if (!BooleanFlagOn(processState, KPH_PROCESS_PROTECTED_PROCESS))
-							Info.append("inactive protections");
-						if (!BooleanFlagOn(processState, KPH_PROCESS_NO_UNTRUSTED_IMAGES))
-							Info.append("unsigned images (likely an unsigned plugin)");
-						if (!BooleanFlagOn(processState, KPH_PROCESS_NOT_BEING_DEBUGGED))
-							Info.append("process is being debugged");
-						if ((processState & KPH_PROCESS_STATE_MINIMUM) != KPH_PROCESS_STATE_MINIMUM)
-							Info.append("tampered primary image");
-					}
-
-					Status = ERR(QString("Unable to access the kernel driver: %1.").arg(Info.join(", ")), STATUS_ACCESS_DENIED);
-				}
 			}
 
 			if (level == KphLevelMax)

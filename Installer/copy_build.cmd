@@ -45,7 +45,7 @@ mkdir %instPath%
 
 ECHO Copying VC Runtime files
 copy "%redistPath%\*" %instPath%\
-
+REM copy c:\Windows\System32\ucrtbase.dll %instPath%\
 
 ECHO Copying Qt libraries
 

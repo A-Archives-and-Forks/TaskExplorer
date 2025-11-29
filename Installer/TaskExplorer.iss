@@ -459,6 +459,6 @@ function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
   Result := '';
   { Handle both DLLs before file copy }
-  PrepareOneDllForUpdate('ksi.dll');
+  PrepareOneDllForUpdate('AMD64\ksi.dll');
   PrepareOneDllForUpdate('ARM64\ksi.dll');
 end;

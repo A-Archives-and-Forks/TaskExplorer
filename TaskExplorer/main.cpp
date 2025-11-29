@@ -21,8 +21,12 @@ CSettings* theConf = NULL;
 
 int main(int argc, char *argv[])
 {
+	wchar_t szPath[MAX_PATH];
+	GetModuleFileNameW(NULL, szPath, ARRAYSIZE(szPath));
+	*wcsrchr(szPath, L'\\') = L'\0';
+
 #ifndef _DEBUG
-	InitMiniDumpWriter(L"TaskExplorer", L"");
+	InitMiniDumpWriter(L"TaskExplorer", szPath);
 #endif
 
 	srand(QTime::currentTime().msec());
@@ -30,12 +34,12 @@ int main(int argc, char *argv[])
 #ifndef USE_TASK_HELPER	
 	bool bSvc = false;
 	bool bWrk = false;
+	QString svcName = TASK_SERVICE_NAME;
+	const char* run_svc = NULL;
 #endif
 	bool bMulti = false;
 	bool bNoSkip = false;
-	QString svcName = TASK_SERVICE_NAME;
 	int timeOut = 0;
-    const char* run_svc = NULL;
     for(int i = 1; i < argc; i++)
     {
 #ifndef USE_TASK_HELPER	
@@ -63,10 +67,12 @@ int main(int argc, char *argv[])
 			// add timeout?
 			WaitForDebugger();
 		}
+#ifndef USE_TASK_HELPER	
 		else if (strcmp(argv[i], "-runsvc") == 0)
 		{
 			run_svc = ++i < argc ? argv[i] : TASK_SERVICE_NAME;
 		}
+#endif
     }
 
 #ifdef WIN32
@@ -86,6 +92,7 @@ int main(int argc, char *argv[])
 	}
 #endif
 
+#ifndef USE_TASK_HELPER	
 	if (run_svc)
 	{
 		if (CTaskService::RunService(run_svc)) {
@@ -94,10 +101,8 @@ int main(int argc, char *argv[])
 		}
 		return EXIT_FAILURE; // 1
 	}
+#endif
 
-	wchar_t szPath[MAX_PATH];
-	GetModuleFileNameW(NULL, szPath, ARRAYSIZE(szPath));
-	*wcsrchr(szPath, L'\\') = L'\0';
 	QString AppDir = QString::fromWCharArray(szPath);
 
 	QStringList dirs = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
@@ -136,6 +141,14 @@ int main(int argc, char *argv[])
 #endif
 #endif // Q_OS_WIN
 
+
+	//
+	// Qt 6 uses the windows font cache which wants to access our process but our driver blocks it
+	// that causes a lot of log entries, hence we disable the use of windows fonr cache.
+	//
+	qputenv("QT_QPA_PLATFORM", QByteArrayLiteral("windows:nodirectwrite"));
+
+
 	QtSingleApplication* pApp = NULL;
 #ifndef USE_TASK_HELPER
 	if (bSvc || bWrk)
@@ -150,11 +163,29 @@ int main(int argc, char *argv[])
 			DrvStatus = InitKSI(AppDir);
 		}
 
-#ifdef Q_OS_WIN
-		SetProcessDPIAware();
-#endif // Q_OS_WIN 
-		//QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling); 
-		//QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
+		// this must be done before we create QApplication
+		int DPI = theConf->GetInt("Options/DPIScaling", 1);
+		if (DPI == 1) {
+			//SetProcessDPIAware();
+			//SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+			//SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+			typedef DPI_AWARENESS_CONTEXT(WINAPI* P_SetThreadDpiAwarenessContext)(DPI_AWARENESS_CONTEXT dpiContext);
+			P_SetThreadDpiAwarenessContext pSetThreadDpiAwarenessContext = (P_SetThreadDpiAwarenessContext)GetProcAddress(GetModuleHandleW(L"user32.dll"), "SetThreadDpiAwarenessContext");
+			if(pSetThreadDpiAwarenessContext) // not present on windows 7
+				pSetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+			else
+				SetProcessDPIAware();
+		}
+		else if (DPI == 2) {
+			QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling); 
+		}
+		//else {
+		//	QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
+		//}
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+		QApplication::setAttribute(Qt::AA_DisableWindowContextHelpButton);
+#endif
 
 		//new QApplication(argc, argv);
 		pApp = new QtSingleApplication((IsElevated() || bTestElevated) ? "TaskExplorer" : "UTaskExplorer", argc, argv);
@@ -233,7 +264,7 @@ int main(int argc, char *argv[])
 			return -1;
 
 		if (State)
-			theConf->SetValue("Options/UseDriver", false);
+			theConf->SetValue("OptionsKSI/KsiEnable", false);
 
 		break;
 	}
@@ -312,9 +343,15 @@ int main(int argc, char *argv[])
 		pApp->setQuitOnLastWindowClosed(false);
 
 		new CTaskExplorer();
-		QObject::connect(QtSingleApplication::instance(), SIGNAL(messageReceived(const QString&)), theGUI, SLOT(OnMessage(const QString&)));
+
+#if QT_VERSION > QT_VERSION_CHECK(6, 7, 0)
+		if (pApp->style()->name() == "windows11" && !theConf->GetBool("Options/UseW11Style", false))
+			pApp->setStyle("windowsvista");
+#endif
+
+		QObject::connect(pApp, SIGNAL(messageReceived(const QString&)), theGUI, SLOT(OnMessage(const QString&)));
 		
-		ret = QApplication::exec();
+		ret = pApp->exec();
 
 		delete theGUI;
 
@@ -324,7 +361,7 @@ int main(int argc, char *argv[])
 	CleanupKSI();
 
 	// note: if ran as a service teh instance wil have already been delted, but delete NULL is ok
-	delete QCoreApplication::instance();
+	delete pApp;
 
 	delete theConf;
 	theConf = NULL;

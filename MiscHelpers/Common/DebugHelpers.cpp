@@ -195,6 +195,8 @@ static MINIDUMP_TYPE s_dumpTyp = MiniDumpNormal; // MiniDumpWithDataSegs or Mini
 static wchar_t s_szMiniDumpName[64];
 static wchar_t s_szMiniDumpPath[MAX_PATH];
 
+bool g_MyCrashHandlerExceptionFilter_Engaged = false;
+
 static LONG __stdcall MyCrashHandlerExceptionFilter(EXCEPTION_POINTERS* pEx)
 {  
 #ifdef _M_IX86
@@ -210,6 +212,9 @@ static LONG __stdcall MyCrashHandlerExceptionFilter(EXCEPTION_POINTERS* pEx)
     __asm mov esp,eax;
   }
 #endif
+
+  g_MyCrashHandlerExceptionFilter_Engaged = true;
+
   bool bSuccess = false;
 
   wchar_t szMiniDumpFileName[128];
@@ -249,6 +254,8 @@ static LONG __stdcall MyCrashHandlerExceptionFilter(EXCEPTION_POINTERS* pEx)
     }
     CloseHandle(hFile);
   }
+
+  g_MyCrashHandlerExceptionFilter_Engaged = false;
 
   wchar_t szMiniDumpMessage[256];
   if (!bSuccess)
