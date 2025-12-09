@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
-## [1.7.0] - 2025-12-??
+## [1.7.0] - 2025-12-09
 
 ### Added
 - added TaskHelper.exe used as worker and service instead of using TaskExplorer.exe itself
@@ -965,4 +965,5 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.0.1] - 2019-05-30
 ### Added
 - ProcessHacker Library integration
+
 
