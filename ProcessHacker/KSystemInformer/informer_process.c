@@ -254,7 +254,7 @@ BOOLEAN KSIAPI KteCidEnumCleanupProcesses(
                 }
 
 #ifdef KERNEL_DEBUG
-                DbgPrintEx(DPFLTR_DEFAULT_ID, 0xFFFFFFFF, "BAM KphpCidEnumCleanupProcesses UnTracking: %s (%d)\n", PsGetProcessImageFileName(process->EProcess), (ULONG)(UINT_PTR)process->ProcessId);
+                DbgPrintEx(DPFLTR_DEFAULT_ID, 0xFFFFFFFF, "BAM KteCidEnumCleanupProcesses UnTracking: %s (%d)\n", PsGetProcessImageFileName(process->EProcess), (ULONG)(UINT_PTR)process->ProcessId);
 #endif
 
                 process = KphUntrackProcessContext(process->ProcessId);   

@@ -1781,7 +1781,8 @@ typedef struct _KPH_PROCESS_CONTEXT
 #else
             ULONG DecidedOnProtection : 1;
             ULONG TrackedFromEnum : 1;
-            ULONG Reserved : 21;
+            ULONG VerifyTimeout : 1;
+            ULONG Reserved : 20;
 #endif
 			
         };
@@ -2514,3 +2515,69 @@ _IRQL_requires_max_(PASSIVE_LEVEL)
 VOID KphInitializeSessionToken(
     VOID
     );
+
+#ifdef IS_KTE
+
+_IRQL_requires_max_(PASSIVE_LEVEL)
+_Must_inspect_result_
+NTSTATUS KteStartWorkerThread();
+
+_IRQL_requires_max_(PASSIVE_LEVEL)
+void KteStopWorkerThread();
+
+_IRQL_requires_max_(PASSIVE_LEVEL)
+VOID KteCleanupProcesses();
+
+_IRQL_requires_max_(PASSIVE_LEVEL)
+void KteTriggerWorkerThread();
+
+/**
+ * \brief Initializes the verification queue infrastructure.
+ *
+ * \return Successful or errant status.
+ */
+_IRQL_requires_max_(PASSIVE_LEVEL)
+_Must_inspect_result_
+NTSTATUS KteInitializeVerificationQueue(
+    VOID
+    );
+
+/**
+ * \brief Cleans up the verification queue infrastructure.
+ */
+_IRQL_requires_max_(PASSIVE_LEVEL)
+VOID KteCleanupVerificationQueue(
+    VOID
+    );
+
+/**
+ * \brief Processes verification work items from the queue.
+ *
+ * \details Called by the worker thread to process pending verification requests.
+ */
+_IRQL_requires_max_(PASSIVE_LEVEL)
+VOID KteProcessVerificationQueue(
+    VOID
+    );
+
+/**
+ * \brief Queues a process for asynchronous tracking and verification.
+ *
+ * \param[in] EProcess The process object to track and verify. This function
+ * takes a reference on the EPROCESS and transfers ownership to the worker thread.
+ * The caller does not need to reference the object before calling.
+ *
+ * \param[out] Process Optional. On success (not timeout), receives a referenced
+ * process context that the caller must dereference. On timeout, set to NULL.
+ *
+ * \return Successful or errant status. Returns STATUS_TIMEOUT if verification
+ * could not complete within the timeout period.
+ */
+_IRQL_requires_max_(APC_LEVEL)
+_Must_inspect_result_
+NTSTATUS KteQueueProcessVerification(
+    _In_ PEPROCESS EProcess,
+    _Out_opt_ PKPH_PROCESS_CONTEXT* Process
+    );
+
+#endif // IS_KTE

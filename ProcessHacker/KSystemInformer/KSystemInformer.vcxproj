@@ -33,7 +33,7 @@
   <PropertyGroup>
     <IntDir>$(SystemInformerRoot)KSystemInformer\obj\$(Configuration)$(PlatformArchitecture)\$(ProjectName)\</IntDir>
     <OutDir>$(SystemInformerRoot)KSystemInformer\bin\$(Configuration)$(PlatformArchitecture)\</OutDir>
-    <TargetName>SystemInformer</TargetName>
+    <TargetName>KTaskExplorer</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
@@ -92,6 +92,7 @@
     <ClCompile Include="system.c" />
     <ClCompile Include="thread.c" />
     <ClCompile Include="util.c" />
+    <ClCompile Include="verification_queue.c" />
     <ClCompile Include="verify.c" />
     <ClCompile Include="vm.c" />
   </ItemGroup>

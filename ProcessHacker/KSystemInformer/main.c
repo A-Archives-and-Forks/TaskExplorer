@@ -15,12 +15,6 @@
 
 #include <trace.h>
 
-#ifdef IS_KTE
-NTSTATUS KteStartWorkerThread();
-void KteStopWorkerThread();
-VOID KteCleanupProcesses();
-#endif
-
 KPH_PROTECTED_DATA_SECTION_RO_PUSH();
 static const BYTE KphpProtectedSectionReadOnly = 0;
 KPH_PROTECTED_DATA_SECTION_RO_POP();
@@ -91,6 +85,7 @@ VOID KphpDriverCleanup(
 
 #ifdef IS_KTE
     KteStopWorkerThread();
+    KteCleanupVerificationQueue();
 #endif
     KphDebugInformerStop();
     KphRegistryInformerStop();
@@ -404,6 +399,16 @@ NTSTATUS DriverEntry(
     }
 
 #ifdef IS_KTE
+    status = KteInitializeVerificationQueue();
+    if (!NT_SUCCESS(status))
+    {
+        KphTracePrint(TRACE_LEVEL_ERROR,
+                      GENERAL,
+                      "Failed to initialize verification queue: %!STATUS!",
+                      status);
+        goto Exit;
+    }
+
     status = KteStartWorkerThread();
     if (!NT_SUCCESS(status))
     {
@@ -494,11 +499,13 @@ static VOID KteWorkerThreadRoutineFunc(PVOID StartContext)
         if (InterlockedCompareExchange(&KteStopWorker, 0, 0) != 0)
             break;
 
-        if (status == STATUS_SUCCESS) 
+        if (status == STATUS_SUCCESS)
         {
             //
             // The work event was signaled (triggered externally).
-            // 
+            //
+			
+            KteProcessVerificationQueue();
         }
         else if (status == STATUS_TIMEOUT)
         {

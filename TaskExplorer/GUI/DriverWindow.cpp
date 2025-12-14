@@ -126,7 +126,7 @@ void CDriverWindow::GetDynData()
 	STATUS Status = TryUpdateDynData(AppDir);
 	if (Status)
 	{
-		QString FileName = theConf->GetString("OptionsKSI/FileName", "SystemInformer.sys");
+		QString FileName = theConf->GetString("OptionsKSI/FileName", "KTaskExplorer.sys");
 		if (!FileName.contains("\\")) 
 		{
 			if (IsOnARM64())

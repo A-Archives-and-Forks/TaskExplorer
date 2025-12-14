@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
 			Message = CTaskExplorer::tr("The current DynData for the KTaskExplorer driver does not yet supported on your windows kernel version.<br />"
 				"You can check for <a href=\"https://github.com/DavidXanatos/TaskExplorer/releases\">TaskExplorer updates on github</a>, "
 				"or grab the latest ksidyn.bin and ksidyn.sig from <a href=\"https://systeminformer.sourceforge.io/downloads\">the latest SystemInformer</a> "
-				"and put them in the instalaltion directors next to KSystemInformer.sys.<br />"
+				"and put them in the instalaltion directors next to KTaskExplorer.sys.<br />"
 				"Instalation Directory: %4<br />"
 				"<br />"
 				"Operating System Details:<br />"

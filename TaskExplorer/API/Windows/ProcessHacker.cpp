@@ -657,7 +657,7 @@ bool g_KsiDynDataLoaded = false;
 
 STATUS InitKSI(const QString& AppDir)
 {
-	QString FileName = theConf->GetString("OptionsKSI/FileName", "SystemInformer.sys");
+	QString FileName = theConf->GetString("OptionsKSI/FileName", "KTaskExplorer.sys");
 	QString ServiceName = theConf->GetString("OptionsKSI/DeviceName", "KTaskExplorer");
 	QString ObjectName = "\\Driver\\" + ServiceName;
 	QString PortName = "\\" + ServiceName;
@@ -747,7 +747,9 @@ STATUS InitKSI(const QString& AppDir)
 	config.Flags.DynDataNoEmbedded = theConf->GetBool("OptionsKSI/DynDataNoEmbedded", false);
 #endif
 
+//#ifndef _DEBUG
 	config.ClientPath = &clientPath->sr;
+//#endif
 
 	config.EnableNativeLoad = KsiEnableLoadNative;
 	config.EnableFilterLoad = KsiEnableLoadFilter;
@@ -973,7 +975,7 @@ STATUS TryUpdateDynData(const QString& AppDir)
 		}
 
 		QString DrvPath;
-		QString DrvFileName = theConf->GetString("OptionsKSI/FileName", "SystemInformer.sys");
+		QString DrvFileName = theConf->GetString("OptionsKSI/FileName", "KTaskExplorer.sys");
 		if (DrvFileName.contains("\\")) 
 			DrvPath = Split2(DrvFileName, "\\", true).first;
 		else if (IsOnARM64())

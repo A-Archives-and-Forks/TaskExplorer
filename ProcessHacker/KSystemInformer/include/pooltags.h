@@ -94,6 +94,7 @@
 // protection
 
 #define KPH_TAG_IMAGE_LOAD_APC                  '0ppK'
+#define KPH_TAG_VERIFY_WORK_ITEM                '1ppK'
 
 // alpc
 

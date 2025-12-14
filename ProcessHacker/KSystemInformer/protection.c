@@ -492,21 +492,19 @@ NTSTATUS KphStartProtectingProcess(
     )
 {
     NTSTATUS status;
-#ifndef IS_KTE
     PKPH_DYN dyn;
-#endif
     BOOLEAN releaseLock;
     SECURITY_SUBJECT_CONTEXT subjectContext;
     BOOLEAN accessGranted;
-#ifndef IS_KTE
     KPH_ENUM_FOR_PROTECTION context;
-#endif
 
     KPH_PAGED_CODE_PASSIVE();
 
     releaseLock = FALSE;
 
-#ifndef IS_KTE
+#ifdef IS_KTE
+    dyn = NULL;
+#else
     dyn = KphReferenceDynData();
     if (!dyn)
     {
@@ -555,17 +553,48 @@ NTSTATUS KphStartProtectingProcess(
     Process->ThreadAllowedMask = ThreadAllowedMask;
 
 #ifdef IS_KTE
+    dyn = KphReferenceDynData();
+    if (!dyn)
+    {
+        // if the process wasn't marked as potentially tainted we are done
+        if (!Process->VerifyTimeout)
+        {
+            //DbgPrintEx(DPFLTR_DEFAULT_ID, 0xFFFFFFFF, "BAM KphStartProtectingProcess: Skipping KphEnumerateProcessContexts, no dyn data available and process wasn't accessed\n");
+            status = STATUS_SUCCESS;
+        }
+        else
+        {
+            //DbgPrintEx(DPFLTR_DEFAULT_ID, 0xFFFFFFFF, "BAM KphStartProtectingProcess: Fail protection process was accessed, and there are no dyn data\n");
+            status = STATUS_NOINTERFACE;
+        }
+        goto Exit;
+    }
+	
+    //DbgPrintEx(DPFLTR_DEFAULT_ID, 0xFFFFFFFF, "BAM KphStartProtectingProcess: KphpEnumProcessContextsForProtection\n");
 
-    //
-    // KTaskExplorer initializes tracking not only from the process creation callback
-    // but also from the first OB callback seen for the process if that happens before.
-    // Hence it never allows the creation of unrestricted usermode handles,
-    // and therfor does not need to modify existing handles after the fact.
-    //
+    context.Dyn = dyn;
+    context.Status = STATUS_SUCCESS;
+    context.Process = Process;
 
-    status = STATUS_SUCCESS;
+    KphEnumerateProcessContexts(KphpEnumProcessContextsForProtection, &context);
+
+    status = context.Status;
+
 Exit:
+
     Process->DecidedOnProtection = TRUE;
+
+    if (releaseLock)
+    {
+        if (!NT_SUCCESS(status))
+        {
+            Process->Protected = FALSE;
+            Process->ProcessAllowedMask = 0;
+            Process->ThreadAllowedMask = 0;
+        }
+
+        KphReleaseRWLock(&Process->ProtectionLock);
+    }
 #else
     context.Dyn = dyn;
     context.Status = STATUS_SUCCESS;
@@ -583,19 +612,17 @@ Exit:
     }
 
 Exit:
-#endif
 
     if (releaseLock)
     {
         KphReleaseRWLock(&Process->ProtectionLock);
     }
+#endif
 
-#ifndef IS_KTE
     if (dyn)
     {
         KphDereferenceObject(dyn);
     }
-#endif
 
     return status;
 }
@@ -720,18 +747,32 @@ VOID KphApplyObProtections(
 
             if (MightBeClient)
             {
-                if (!process)
-                {
-#ifdef KERNEL_DEBUG
-                    DbgPrintEx(DPFLTR_DEFAULT_ID, 0xFFFFFFFF, "BAM KphApplyObProtections Tracking: %s (%d) for %s (%d)\n", PsGetProcessImageFileName(Info->Object), (ULONG)(UINT_PTR)PsGetProcessId(Info->Object),
-                        PsGetProcessImageFileName(actor->ProcessContext->EProcess), (ULONG)(UINT_PTR)actor->ProcessContext->ProcessId);
-#endif
-                    process = KphTrackProcessContext(Info->Object);
-                }
+                KphTracePrint(TRACE_LEVEL_VERBOSE,
+                    PROTECTION,
+                    "Queuing async verification for process %lu",
+                    HandleToULong(PsGetProcessId(Info->Object)));
 
-                if (process)
+                status = KteQueueProcessVerification(Info->Object, &process);
+
+#ifdef KERNEL_DEBUG
+                DbgPrintEx(DPFLTR_DEFAULT_ID, 0xFFFFFFFF, "BAM KphApplyObProtections Queueing %s: %s (%d) for %s (%d); status 0x%08x\n", process ? "Tracking and Verification" : "Verification", PsGetProcessImageFileName(Info->Object), (ULONG)(UINT_PTR)PsGetProcessId(Info->Object),
+                    PsGetProcessImageFileName(actor->ProcessContext->EProcess), (ULONG)(UINT_PTR)actor->ProcessContext->ProcessId, status);
+#endif
+
+                if (status == STATUS_TIMEOUT)
                 {
-                    KphVerifyProcessAndProtectIfAppropriate(process);
+                    KphTracePrint(TRACE_LEVEL_WARNING,
+                                  PROTECTION,
+                                  "Async verification timeout for process %lu",
+                                  HandleToULong(PsGetProcessId(Info->Object)));
+                }
+                else if (!NT_SUCCESS(status))
+                {
+                    KphTracePrint(TRACE_LEVEL_ERROR,
+                                  PROTECTION,
+                                  "Failed to queue verification for process %lu: %!STATUS!",
+                                  HandleToULong(PsGetProcessId(Info->Object)),
+                                  status);
                 }
             }
         }
