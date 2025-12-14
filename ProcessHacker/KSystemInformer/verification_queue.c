@@ -151,7 +151,10 @@ VOID KtepProcessVerificationItem(
         return;
     }
 
-    KphVerifyProcessAndProtectIfAppropriate(workItem->Process);
+    if (!workItem->Process->DecidedOnProtection)
+    {
+        KphVerifyProcessAndProtectIfAppropriate(workItem->Process);
+    }
 
     KeSetEvent(&workItem->CompletionEvent, IO_NO_INCREMENT, FALSE);
 }
