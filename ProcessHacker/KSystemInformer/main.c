@@ -286,9 +286,9 @@ NTSTATUS DriverEntry(
     if (!NT_SUCCESS(status))
     {
         KphTracePrint(TRACE_LEVEL_ERROR,
-            GENERAL,
-            "Failed to initialize verification queue: %!STATUS!",
-            status);
+                      GENERAL,
+                      "Failed to initialize verification queue: %!STATUS!",
+                      status);
         goto Exit;
     }
 #endif
