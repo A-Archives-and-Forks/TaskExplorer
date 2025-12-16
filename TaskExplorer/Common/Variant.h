@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Buffer.h"
-#include "Strings.h"
+//#include "Strings.h"
 #include "VariantDefs.h"
 
 union _TVarIndex

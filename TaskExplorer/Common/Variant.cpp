@@ -2,7 +2,7 @@
 #include "Variant.h"
 //#include "../../zlib/zlib.h"
 #include "Exception.h"
-#include "Strings.h"
+//#include "Strings.h"
 
 CVariant::CVariant(EType Type)
 {

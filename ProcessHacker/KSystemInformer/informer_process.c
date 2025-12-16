@@ -74,6 +74,10 @@ VOID KphpFreeProcessCreateApc(
     KphDereferenceObject(KphpProcesCreateApcLookaside);
 }
 
+#ifdef IS_KTE
+static volatile ULONG KteProcessCleanupTrigger = FALSE;
+#endif
+
 /**
  * \brief Performing process tracking.
  *
@@ -127,6 +131,10 @@ PKPH_PROCESS_CONTEXT KphpPerformProcessTracking(
                       HandleToULong(process->ProcessId));
 
         process->ExitNotification = TRUE;
+
+#ifdef IS_KTE
+        KteProcessCleanupTrigger = TRUE;
+#endif
 
         NT_ASSERT(process->NumberOfThreads == 0);
         NT_ASSERT(IsListEmpty(&process->ThreadListHead));
@@ -213,9 +221,10 @@ BOOLEAN KSIAPI KteCidEnumCleanupProcesses(
         // The otehr case is when both ExitNotification and CreateNotification or TrackedFromEnum are set meaning
         // the process was tracked by creation notification or enumerated and then received a termination notification.
         // In that case we can also untrack it, after waiting for the process to fully terminate.
+        // Last but not least we can see only ExitNotification meaning it's start was aborted before we got a create notification
         //
 
-        if ((!!process->ExitNotification == (process->TrackedFromEnum || process->CreateNotification)) || KteProcessCleanupCounter == 0) 
+        if ((process->ExitNotification || !(process->TrackedFromEnum || process->CreateNotification)) || KteProcessCleanupCounter == 0) 
         {
             NTSTATUS status;
             LARGE_INTEGER timeout;
@@ -236,7 +245,7 @@ BOOLEAN KSIAPI KteCidEnumCleanupProcesses(
                     status);
 
                 // Note: this error message is itself prone to a race condition the cleanup condition may be false but ocne we are done with KeWaitForSingleObject the process may have terminated, hence we re check the condition
-                if (!(!!process->ExitNotification == (process->TrackedFromEnum || process->CreateNotification)))
+                if (!(process->ExitNotification || !(process->TrackedFromEnum || process->CreateNotification)))
                 {
                     KphTracePrint(TRACE_LEVEL_ERROR,
                         TRACKING,
@@ -276,7 +285,11 @@ VOID KteCleanupProcesses()
     if (KteProcessCleanupCounter++ >= 100)
         KteProcessCleanupCounter = 0;
 
-    KphEnumerateCidContexts(KteCidEnumCleanupProcesses, NULL);
+    if (KteProcessCleanupCounter % 10 == 0 || KteProcessCleanupTrigger) // every ~1s
+    {
+        KteProcessCleanupTrigger = FALSE;
+        KphEnumerateCidContexts(KteCidEnumCleanupProcesses, NULL);
+    }
 }
 #endif
 

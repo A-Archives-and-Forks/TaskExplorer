@@ -23,7 +23,7 @@ extern "C" {
 // CVariant includes (STL-only, no Qt)
 #include "../TaskExplorer/Common/Types.h"
 #include "../TaskExplorer/Common/VariantDefs.h"
-#include "../TaskExplorer/Common/Strings.h"
+//#include "../TaskExplorer/Common/Strings.h"
 #include "../TaskExplorer/Common/Buffer.h"
 #include "../TaskExplorer/Common/Variant.h"
 
