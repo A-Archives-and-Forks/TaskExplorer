@@ -128,7 +128,21 @@ VOID KtepProcessVerificationItem(
         //
         // No existing process context, track it now, this may return an already tracked process
         //
-        workItem->Process = KphTrackProcessContext(workItem->EProcess);
+
+        NTSTATUS status;
+        LARGE_INTEGER timeout;
+
+        timeout.QuadPart = 0;
+        status = KeWaitForSingleObject(workItem->EProcess,
+            Executive,
+            KernelMode,
+            FALSE,
+            &timeout);
+
+        if (status == STATUS_TIMEOUT)
+        {
+            workItem->Process = KphTrackProcessContext(workItem->EProcess);
+        }
     }
 
     if(!workItem->Process)
