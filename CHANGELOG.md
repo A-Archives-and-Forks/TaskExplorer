@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
-## [1.7.1] - 2025-12-??
+## [1.7.1] - 2025-12-23
 
 ### Added
 - added sandboxie style online updater
@@ -982,5 +982,6 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.0.1] - 2019-05-30
 ### Added
 - ProcessHacker Library integration
+
 
 
