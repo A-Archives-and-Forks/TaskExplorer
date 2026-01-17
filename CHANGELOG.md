@@ -5,6 +5,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 
 
+
+
+## [1.7.2] - 2025-12-??
+
+### Fixed
+- fixed crash issue on start up affecting soeme systems
+
+
+
+
 ## [1.7.1] - 2025-12-23
 
 ### Added

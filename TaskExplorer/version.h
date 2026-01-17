@@ -2,7 +2,7 @@
 
 #define VERSION_MJR		1
 #define VERSION_MIN 	7
-#define VERSION_REV 	1
+#define VERSION_REV 	2
 #define VERSION_UPD 	0
 
 #ifndef STR
@@ -20,5 +20,5 @@
 
 #define MY_PRODUCT_NAME_STRING  "TaskExplorer"
 #define MY_COMPANY_NAME_STRING  "xanasoft.com"
-#define MY_COPYRIGHT_STRING     "Copyright (C) 2019-2025 David Xanatos (xanasoft.com)"
+#define MY_COPYRIGHT_STRING     "Copyright (C) 2019-2026 David Xanatos (xanasoft.com)"
 
